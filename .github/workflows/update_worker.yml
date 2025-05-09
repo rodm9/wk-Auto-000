@@ -1,4 +1,4 @@
-name: Auto Update Worker  名称：自动更新工作程序
+name: Auto Update Worker
 
 on:
   push:
@@ -10,8 +10,6 @@ on:
 
 permissions:
   contents: write
-权限：
-内容： 写入
 
 jobs:
   update:
@@ -19,12 +17,6 @@ jobs:
     steps:
       - name: 初始化仓库
         uses: actions/checkout@v4
-工作：
-更新：
-运行时间：ubuntu-latest
-步骤：
-      - name: 初始化仓库
-用途：作/checkout@v4
 
       - name: 获取当前本地版本
         id: get_local_version
@@ -38,18 +30,6 @@ jobs:
             LOCAL_VERSION=""
           fi
           echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
-- name: 获取当前本地版本
-编号： get_local_version
-运行： |
-          echo -e "\033[34m[获取本地版本]\033[0m"
-如果 [ -f version.txt ];然后
-LOCAL_VERSION=$（猫 version.txt）
-            echo "当前本地版本: $LOCAL_VERSION"
-还
-            echo "首次同步，没有本地版本。"
-LOCAL_VERSION=“”
-fi
-echo “LOCAL_VERSION=$LOCAL_VERSION” >> $GITHUB_ENV
 
       - name: 获取最新 Release 信息
         id: get_release
@@ -60,31 +40,15 @@ echo “LOCAL_VERSION=$LOCAL_VERSION” >> $GITHUB_ENV
           LATEST_RELEASE=$(echo "$RESPONSE" | jq -r '.[0]')
           TAG_NAME=$(echo "$LATEST_RELEASE" | jq -r '.tag_name')
           DOWNLOAD_URL=$(echo "$LATEST_RELEASE" | jq -r '.assets[] | select(.name == "worker.zip") | .browser_download_url')
-- name: 获取最新 Release 信息
-编号： get_release
-运行： |
-echo -e “\033[34m[获取最新 Release]\033[0m”
-API_URL=“https://api.github.com/repos/bia-pain-bache/BPB-Worker-Panel/releases”
-响应=$（curl -s “$API_URL”）
-LATEST_RELEASE=$（echo “$RESPONSE” | jq -r '.[0]')
-TAG_NAME=$（echo “$LATEST_RELEASE” | jq -r '.tag_name'）
-DOWNLOAD_URL=$（echo “$LATEST_RELEASE” | jq -r '.assets[] | select（.name == “worker.zip”） | .browser_download_url'）
 
           if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" == "null" ]; then
             echo -e "\033[31m未找到 worker.zip，退出！\033[0m"
             exit 1
           fi
-if [ -z “$DOWNLOAD_URL” ] ||[ “$DOWNLOAD_URL” == “null” ];然后
-echo -e “\033[31m未找到 worker.zip，退出！\033[0m”
-1 号出口
-fi
 
           echo "最新版本号: $TAG_NAME"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-echo “最新版本号： $TAG_NAME”
-echo “DOWNLOAD_URL=$DOWNLOAD_URL” >> $GITHUB_ENV
-echo “TAG_NAME=$TAG_NAME” >> $GITHUB_ENV
 
       - name: 判断是否需要更新
         id: check_update
@@ -97,17 +61,6 @@ echo “TAG_NAME=$TAG_NAME” >> $GITHUB_ENV
             echo -e "\033[33m发现新版本，需要更新！\033[0m"
             echo "UPDATE_NEEDED=true" >> $GITHUB_ENV
           fi
-- name: 判断是否需要更新
-编号： check_update
-运行： |
-          echo -e "\033[34m[判断是否需要更新]\033[0m"
-if [ “$LOCAL_VERSION” = “$TAG_NAME” ];然后
-            echo -e "\033[32m已经是最新版本，无需更新。 \033[0m"
-echo “UPDATE_NEEDED=false” >> $GITHUB_ENV
-还
-            echo -e "\033[33m发现新版本，需要更新！ \033[0m"
-echo “UPDATE_NEEDED=true” >> $GITHUB_ENV
-fi
 
       - name: 如果需要，清理旧文件并下载新版本
         if: env.UPDATE_NEEDED == 'true'
@@ -122,19 +75,6 @@ fi
           rm worker.zip
           echo -e "\033[34m[记录新版本号]\033[0m"
           echo "$TAG_NAME" > version.txt
-- name： 如果需要，清理旧文件并下载新版本
-if： env 的 Env 中。UPDATE_NEEDED == '真'
-运行： |
-echo -e “\033[34m[清理旧文件]\033[0m”
-rm-rf./*
-echo -e “\033[34m[下载最新 worker.zip]\033[0m”
-wget -O worker.zip “$DOWNLOAD_URL”
-echo -e “\033[34m[解压 worker.zip]\033[0m”
-解压缩 worker.zip
-echo -e “\033[34m[删除 worker.zip]\033[0m”
-RM worker.zip
-echo -e “\033[34m[记录新版本号]\033[0m”
-echo “$TAG_NAME” > version.txt
 
       - name: 提交更改
         if: env.UPDATE_NEEDED == 'true'
@@ -143,11 +83,3 @@ echo “$TAG_NAME” > version.txt
           commit_message: "🔄 自动同步最新 Worker 版本：${{ env.TAG_NAME }}"
           commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
           push_options: --force
-
-- name： 提交更改
-if： env 的 Env 中。UPDATE_NEEDED == '真'
-用途： stefanzweifel/git-auto-commit-action@v5
-跟：
-commit_message： “ 🔄 自动同步最新 Worker 版本：${{ env.TAG_NAME }}”
-commit_author：“github-actions[bot] <github-actions[bot]@users.noreply.github.com>”
-push_options： --force
